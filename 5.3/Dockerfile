@@ -8,7 +8,7 @@ ENV PHP_VERSION 5.3.3
 # persistent / runtime deps
 RUN echo "deb http://http.debian.net/debian-backports squeeze-backports main" > /etc/apt/sources.list.d/backports.list \
   && apt-get update \
-  && apt-get install -y git ca-certificates curl librecode0 libsqlite3-0 libxml2 --no-install-recommends && rm -r /var/lib/apt/lists/*
+  && apt-get install -y git ca-certificates curl librecode0 libsqlite3-0 libxml2 libicu44 --no-install-recommends && rm -r /var/lib/apt/lists/*
 
 # phpize deps
 RUN apt-get update && apt-get install -y autoconf file g++ gcc libc-dev make pkg-config re2c --no-install-recommends && rm -r /var/lib/apt/lists/*
@@ -24,6 +24,7 @@ RUN buildDeps=" \
     libsqlite3-dev \
     libssl-dev \
     libxml2-dev \
+    libicu-dev \
     zlib1g-dev \
   " \
   && set -x \
@@ -39,16 +40,21 @@ RUN buildDeps=" \
     $PHP_EXTRA_CONFIGURE_ARGS \
     --disable-cgi \
     --enable-zip \
+    --enable-intl \
     --with-curl \
     --with-openssl \
     --with-readline \
     --with-recode \
     --with-zlib \
-  && make -j"$(nproc)" \
-  && make install \
+  && make -j"$(nproc)" && make install && make clean \
+  && curl -SL http://xdebug.org/files/xdebug-2.2.7.tgz -o xdebug.tgz \
+  && mkdir -p /usr/src/php-xdebug \
+  && tar -xof xdebug.tgz -C /usr/src/php-xdebug && rm xdebug.tgz \
+  && cd /usr/src/php-xdebug/xdebug-* \
+  && phpize && ./configure --enable-xdebug && make -j"$(nproc)" && make install && make clean \
+  && echo "zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20090626/xdebug.so" > $PHP_INI_DIR"/conf.d/xdebug.ini" \
   && { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $buildDeps \
-  && make clean
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $buildDeps
 
 COPY php.ini $PHP_INI_DIR/
 
