@@ -20,8 +20,8 @@ script:
   - docker run -it jakzal/symfony-dev:$VERSION php -v
   - docker run -it jakzal/symfony-dev:$VERSION php -m | grep intl
   - if [ "$VERSION" != "7.0" ]; then docker run -it jakzal/symfony-dev:$VERSION php -m | grep xdebug; fi
-  - if [ "$VERSION" != "5.3" ] && [ "$VERSION" != "7.0" ]; then docker run -it jakzal/symfony-dev:$VERSION php -m | grep -E 'memcache\W'; fi
-  - if [ "$VERSION" != "5.3" ] && [ "$VERSION" != "7.0" ]; then docker run -it jakzal/symfony-dev:$VERSION php -m | grep memcached; fi
+  - if [ "$VERSION" != "7.0" ]; then docker run -it jakzal/symfony-dev:$VERSION php -m | grep -E 'memcache\W'; fi
+  - if [ "$VERSION" != "7.0" ]; then docker run -it jakzal/symfony-dev:$VERSION php -m | grep memcached; fi
 
 after_script:
   - docker images
