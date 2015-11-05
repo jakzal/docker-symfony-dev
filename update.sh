@@ -19,7 +19,7 @@ PHP_EXTRA_INSTALL_CMD["56"]=${PHP_EXTRA_INSTALL_CMD["54"]}
 PHP_EXTRA_INSTALL_CMD["70"]=""
 
 for version in "${versions[@]}"; do
-    if [ "$version" == "5.3" ]; then echo "Skipping 5.3"; continue; fi
+    if [ "$version" == "5.3.3" ] || [ "$version" == "5.3" ]; then echo "Skipping $version"; continue; fi
 
     echo "Updating $version"
     var=$(echo $version|sed -e 's/\.//g')
